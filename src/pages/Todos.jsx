@@ -8,6 +8,8 @@ export default function Todos() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -26,6 +28,24 @@ export default function Todos() {
 
   const toggle = (id, completed) => updateDoc(doc(db, "users", currentUser.uid, "todos", id), { completed: !completed });
   const remove = (id) => deleteDoc(doc(db, "users", currentUser.uid, "todos", id));
+  const updateTodo = async (id) => {
+    if (!editText.trim()) {
+      alert("Todo text cannot be empty");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "users", currentUser.uid, "todos", id), { text: editText.trim() });
+      setEditingId(null);
+      setEditText("");
+    } catch (error) {
+      console.error("Error updating todo:", error);
+      alert("Failed to update todo");
+    }
+  };
+  const startEdit = (todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  };
   const handleLogout = async () => { await logout(); navigate("/login", { replace: true }); };
 
   const completed = todos.filter(t => t.completed).length;
@@ -71,8 +91,28 @@ export default function Todos() {
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${todo.completed ? "bg-green-500 border-green-500" : "border-gray-500"}`}>
                     {todo.completed && <span className="text-white text-xs">✓</span>}
                   </button>
-                  <span className={`flex-1 ${todo.completed ? "line-through text-gray-500" : "text-white"}`}>{todo.text}</span>
-                  <button onClick={() => remove(todo.id)} className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400">✕</button>
+                  {editingId === todo.id ? (
+                    <>
+                      <input
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") updateTodo(todo.id);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        className="flex-1 px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                        autoFocus
+                      />
+                      <button type="button" onClick={async () => await updateTodo(todo.id)} className="px-3 py-1 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600">Save</button>
+                      <button type="button" onClick={() => setEditingId(null)} className="px-3 py-1 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600">Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <span className={`flex-1 ${todo.completed ? "line-through text-gray-500" : "text-white"}`}>{todo.text}</span>
+                      <button onClick={() => startEdit(todo)} className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-400 px-3 py-1 text-sm">✎</button>
+                      <button onClick={() => remove(todo.id)} className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-400 px-3 py-1 text-sm">✕</button>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
