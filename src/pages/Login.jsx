@@ -42,9 +42,9 @@ export default function Login() {
         {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl mb-6 text-sm text-center">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" disabled={loading}
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" disabled={loading} autoComplete="email"
             className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50" />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" disabled={loading}
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" disabled={loading} autoComplete="current-password"
             className="w-full px-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50" />
           <button type="submit" disabled={loading}
             className="w-full py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold uppercase tracking-wider disabled:opacity-50">
